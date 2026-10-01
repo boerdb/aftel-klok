@@ -64,23 +64,23 @@ export function CountdownClock() {
   }, [state.timeLeft]);
 
   useEffect(() => {
-    if (!state.isRunning) {
-      void releaseWakeLock(wakeLockRef);
-      return;
-    }
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && stateRef.current.isRunning) {
-        void requestWakeLock(wakeLockRef);
+    const keepAwake = () => {
+      if (document.visibilityState !== 'visible') {
+        return;
       }
+      void requestWakeLock(wakeLockRef);
     };
 
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    keepAwake();
+    document.addEventListener('visibilitychange', keepAwake);
+    window.addEventListener('pointerdown', keepAwake);
+
     return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
+      document.removeEventListener('visibilitychange', keepAwake);
+      window.removeEventListener('pointerdown', keepAwake);
       void releaseWakeLock(wakeLockRef);
     };
-  }, [state.isRunning]);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -269,7 +269,6 @@ export function CountdownClock() {
               onClick={() => {
                 unlockAudio();
                 apply(startTimer(state));
-                void requestWakeLock(wakeLockRef);
                 setMenuOpen(false);
               }}
             >
