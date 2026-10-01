@@ -4,8 +4,8 @@ export const dynamic = 'force-static';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Aftelklok',
-    short_name: 'Aftelklok',
+    name: 'Timer',
+    short_name: 'Timer',
     description: 'Aftelklok voor training en rust op een liggende tablet.',
     id: '/',
     start_url: '/',

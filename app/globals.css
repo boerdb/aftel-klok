@@ -418,53 +418,144 @@ input {
   pointer-events: none;
 }
 
-.install-banner {
-  display: none;
+.phone-gate {
   position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
-  z-index: 10000;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #1d262f;
-  color: #f6f7f9;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-.install-banner--ios {
-  background: #20344b;
-}
-
-.install-banner__text {
-  flex: 1;
-  font-size: 0.92rem;
-  line-height: 1.35;
-}
-
-.install-banner__actions {
+  inset: 0;
+  z-index: 90;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
 }
 
-.install-banner__button {
-  border: 0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.88rem;
+.phone-gate-card {
+  background: #fff;
+  border: 3px solid #161616;
+  border-radius: 24px;
+  padding: 28px 26px;
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+  color: #161616;
+}
+
+.phone-gate-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.phone-gate-card h2 {
+  margin: 10px 0 8px;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.phone-gate-card p {
+  margin: 0;
+  color: #5b564c;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.phone-gate-url {
+  margin-top: 14px !important;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #e7f0dc;
+  color: #161616 !important;
+  font-size: 1rem;
+}
+
+.phone-gate-url strong {
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+  user-select: all;
+}
+
+.install-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.install-card {
+  width: min(100%, 380px);
+  background: #fff;
+  border: 3px solid #161616;
+  border-radius: 24px;
+  padding: 22px 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  color: #161616;
+}
+
+.install-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #1a8f6a;
+}
+
+.install-card h2 {
+  margin: 6px 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.install-lead {
+  margin: 10px 0 0;
+  color: #5b564c;
   font-weight: 600;
-  color: #132331;
-  background: #84ddff;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.install-steps {
+  margin: 14px 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #161616;
+}
+
+.install-actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.install-btn-primary,
+.install-btn-secondary {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.install-banner__button--ghost {
-  color: #f6f7f9;
-  background: rgba(255, 255, 255, 0.14);
+.install-btn-primary {
+  border: none;
+  background: #2fbe80;
+  color: #fff;
+}
+
+.install-btn-secondary {
+  border: 2px solid #161616;
+  background: transparent;
+  color: #161616;
 }
 
 @media (orientation: landscape) and (min-width: 1024px) {
@@ -472,8 +563,7 @@ input {
     display: none;
   }
 
-  .shell,
-  .install-banner {
+  .shell {
     display: flex;
   }
 }

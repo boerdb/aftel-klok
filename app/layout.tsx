@@ -4,11 +4,11 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Aftelklok',
   description: 'Aftelklok voor training en rust op een liggende tablet.',
-  applicationName: 'Aftelklok',
+  applicationName: 'Timer',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Aftelklok',
+    title: 'Timer',
   },
   formatDetection: {
     telephone: false,

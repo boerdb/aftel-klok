@@ -1,139 +1,118 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { isAndroidDevice, isIosDevice, isPhoneDevice, isStandaloneMode } from '@/lib/pwa';
+
+const dismissKey = 'timer-install-dismissed';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-const androidDismissKey = 'install-banner-dismissed-android';
-const iosDismissKey = 'install-banner-dismissed-ios';
-
-function isDismissed(key: string): boolean {
-  return localStorage.getItem(key) === '1';
-}
-
-function persistDismiss(key: string): void {
-  localStorage.setItem(key, '1');
-}
-
-function isStandaloneMode(): boolean {
-  const nav = window.navigator as Navigator & { standalone?: boolean };
-  return window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
-}
-
-function isAndroid(): boolean {
-  return /android/i.test(navigator.userAgent);
-}
-
-function isIos(): boolean {
-  const ua = navigator.userAgent.toLowerCase();
-  const isIosDevice = /iphone|ipad|ipod/.test(ua);
-  const isIpadOs = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-  return isIosDevice || isIpadOs;
-}
+type Platform = 'ios' | 'android';
 
 export function InstallPrompt() {
+  const [platform, setPlatform] = useState<Platform | null>(null);
+  const [open, setOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showAndroidBanner, setShowAndroidBanner] = useState(false);
-  const [showIosBanner, setShowIosBanner] = useState(false);
 
   useEffect(() => {
-    const update = (prompt: BeforeInstallPromptEvent | null) => {
-      const standalone = isStandaloneMode();
-      setShowAndroidBanner(
-        isAndroid() && !standalone && !isDismissed(androidDismissKey) && prompt !== null,
-      );
-      setShowIosBanner(isIos() && !standalone && !isDismissed(iosDismissKey));
+    if (isStandaloneMode()) return;
+    if (isPhoneDevice()) return;
+    if (localStorage.getItem(dismissKey) === '1') return;
+
+    const onBeforeInstall = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
     };
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
 
-    update(null);
-
-    const onBeforeInstallPrompt = (event: Event) => {
-      const promptEvent = event as BeforeInstallPromptEvent;
-      promptEvent.preventDefault();
-      setDeferredPrompt(promptEvent);
-      update(promptEvent);
-    };
-
-    const onAppInstalled = () => {
-      setDeferredPrompt(null);
-      persistDismiss(androidDismissKey);
-      update(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-    window.addEventListener('appinstalled', onAppInstalled);
+    const timer = window.setTimeout(() => {
+      if (isIosDevice()) {
+        setPlatform('ios');
+        setOpen(true);
+      } else if (isAndroidDevice()) {
+        setPlatform('android');
+        setOpen(true);
+      }
+    }, 1800);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', onAppInstalled);
+      window.clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
     };
   }, []);
 
-  async function installOnAndroid(): Promise<void> {
-    if (!deferredPrompt) {
-      return;
-    }
+  function dismiss(): void {
+    localStorage.setItem(dismissKey, '1');
+    setOpen(false);
+  }
 
+  async function installAndroid(): Promise<void> {
+    if (!deferredPrompt) return;
     await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-
-    if (choice.outcome === 'accepted') {
-      persistDismiss(androidDismissKey);
-    }
-
+    const { outcome } = await deferredPrompt.userChoice;
     setDeferredPrompt(null);
-    setShowAndroidBanner(false);
+    if (outcome === 'accepted') {
+      localStorage.setItem(dismissKey, '1');
+      setOpen(false);
+    }
   }
 
-  if (showAndroidBanner) {
-    return (
-      <div className="install-banner">
-        <div className="install-banner__text">
-          Installeer deze app op je Android-startscherm voor snellere toegang.
-        </div>
-        <div className="install-banner__actions">
-          <button type="button" className="install-banner__button" onClick={() => void installOnAndroid()}>
-            Installeren
-          </button>
-          <button
-            type="button"
-            className="install-banner__button install-banner__button--ghost"
-            onClick={() => {
-              persistDismiss(androidDismissKey);
-              setShowAndroidBanner(false);
-            }}
-          >
-            Later
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (!open || !platform) return null;
 
-  if (showIosBanner) {
-    return (
-      <div className="install-banner install-banner--ios">
-        <div className="install-banner__text">
-          Voeg deze app toe aan je iPad-startscherm: tik op Delen in Safari en kies Zet op beginscherm.
-        </div>
-        <div className="install-banner__actions">
-          <button
-            type="button"
-            className="install-banner__button install-banner__button--ghost"
-            onClick={() => {
-              persistDismiss(iosDismissKey);
-              setShowIosBanner(false);
-            }}
-          >
+  return (
+    <div className="install-overlay" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div className="install-card">
+        <p className="install-kicker">{platform === 'ios' ? 'iPhone / iPad' : 'Android'}</p>
+        <h2 id="install-title">Installeer Timer op je beginscherm</h2>
+        <p className="install-lead">
+          Dan open je de timer als app, zonder browserbalk — handig op de tablet.
+        </p>
+
+        {platform === 'ios' ? (
+          <ol className="install-steps">
+            <li>
+              Tik op <strong>Delen</strong> (vierkant met pijl omhoog) in Safari
+            </li>
+            <li>
+              Scroll en kies <strong>Zet op beginscherm</strong>
+            </li>
+            <li>
+              Tik op <strong>Voeg toe</strong>
+            </li>
+          </ol>
+        ) : (
+          <ol className="install-steps">
+            {deferredPrompt ? (
+              <li>
+                Tik op <strong>Installeren</strong> hieronder
+              </li>
+            ) : (
+              <>
+                <li>
+                  Tik op het <strong>menu</strong> (⋮) rechtsboven in Chrome
+                </li>
+                <li>
+                  Kies <strong>App installeren</strong> of <strong>Toevoegen aan startscherm</strong>
+                </li>
+              </>
+            )}
+          </ol>
+        )}
+
+        <div className="install-actions">
+          {platform === 'android' && deferredPrompt ? (
+            <button type="button" className="install-btn-primary" onClick={() => void installAndroid()}>
+              Installeren
+            </button>
+          ) : null}
+          <button type="button" className="install-btn-secondary" onClick={dismiss}>
             Begrepen
           </button>
         </div>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import { CountdownClock } from '@/components/countdown-clock';
 import { InstallPrompt } from '@/components/install-prompt';
+import { PhoneGate } from '@/components/phone-gate';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
 
 export default function HomePage() {
@@ -13,6 +14,7 @@ export default function HomePage() {
         </p>
       </section>
       <CountdownClock />
+      <PhoneGate />
       <InstallPrompt />
     </>
   );
