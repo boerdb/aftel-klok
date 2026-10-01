@@ -1,7 +1,0 @@
-{
-  "name": "aftelklok-app",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular-standalone"
-}

@@ -1,0 +1,479 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.gate {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+  background: #0d124a;
+}
+
+.gate h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.gate p {
+  max-width: 28rem;
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.45;
+}
+
+.shell {
+  display: none;
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  transition: background 0.8s ease;
+}
+
+.shell--work {
+  --ring-accent: #1fd2c7;
+  --ring-glow: rgba(31, 210, 199, 0.3);
+  background: #002b26;
+}
+
+.shell--rest {
+  --ring-accent: #45b8ff;
+  --ring-glow: rgba(69, 184, 255, 0.32);
+  background: #0d124a;
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.menu-hint {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  opacity: 0.55;
+}
+
+.brand-credit {
+  position: absolute;
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+
+.brand-credit img {
+  width: 92px;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.brand-credit span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.shell--menu-open .backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(380px, 88vw);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px 22px;
+  overflow: auto;
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  transform: translateX(-105%);
+  pointer-events: none;
+  transition: transform 0.28s ease;
+}
+
+.shell--menu-open .menu {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.menu h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.duration-fields {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.duration-fields legend {
+  padding: 0;
+  font-size: 1rem;
+}
+
+.time-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #111;
+  color: #fff;
+  caret-color: transparent;
+  cursor: pointer;
+}
+
+.field input.is-active {
+  border-color: #84ddff;
+  box-shadow: 0 0 0 2px rgba(132, 221, 255, 0.35);
+}
+
+.keypad__title {
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+
+.keypad__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.keypad__key {
+  min-height: 52px;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.keypad__key--done {
+  background: #84ddff;
+  color: #132331;
+}
+
+.keypad__key--wide {
+  font-size: 1rem;
+}
+
+.start-button,
+.round-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  color: #04120f;
+  background: #3ddc97;
+  cursor: pointer;
+}
+
+.start-button {
+  min-height: 56px;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.round-button {
+  flex: 1;
+  flex-direction: column;
+  min-height: 96px;
+  border: 3px solid #fff;
+  border-radius: 18px;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+.start-button svg,
+.round-button svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+.countdown-ring {
+  --ring-track: rgba(255, 255, 255, 0.14);
+  --ring-inner-line: rgba(255, 255, 255, 0.16);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(90dvh, 86vw);
+  aspect-ratio: 1;
+  margin-top: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0) 72%);
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--ring-accent) 18%, transparent),
+    0 0 36px var(--ring-glow);
+}
+
+.countdown-ring::before {
+  content: "";
+  position: absolute;
+  inset: clamp(12px, 2vmin, 18px);
+  border-radius: 50%;
+  border: 2px solid var(--ring-inner-line);
+}
+
+.countdown-ring__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.countdown-ring__track,
+.countdown-ring__progress {
+  fill: none;
+  stroke-width: 5;
+}
+
+.countdown-ring__track {
+  stroke: var(--ring-track);
+}
+
+.countdown-ring__progress {
+  stroke: var(--ring-accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.85s linear, stroke 0.35s ease;
+  filter: drop-shadow(0 0 10px var(--ring-glow));
+}
+
+.countdown-ring__inner {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-align: center;
+}
+
+.big-time {
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  color: #fff;
+  -webkit-text-stroke: 4px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 3px 0 #000,
+    0 8px 16px rgba(0, 0, 0, 0.9);
+  transition: font-size 0.25s ease, letter-spacing 0.25s ease, transform 0.25s ease;
+}
+
+.big-time--with-minutes,
+.big-time--seconds-only {
+  font-size: clamp(9rem, 24vmin, 17rem);
+}
+
+.big-time--with-minutes {
+  letter-spacing: -0.06em;
+}
+
+.big-time--seconds-only {
+  letter-spacing: -0.03em;
+}
+
+.big-time--mode-switch {
+  animation: time-mode-switch 0.32s ease;
+}
+
+@keyframes time-mode-switch {
+  0% {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.phase-label {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  right: 0;
+  font-size: clamp(1.4rem, 3.2vmin, 2.6rem);
+  letter-spacing: 0.45rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.info-top {
+  position: absolute;
+  top: 16%;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  font-size: clamp(1.2rem, 2.5vmin, 2rem);
+  text-align: center;
+  pointer-events: none;
+}
+
+.install-banner {
+  display: none;
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10000;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #1d262f;
+  color: #f6f7f9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.install-banner--ios {
+  background: #20344b;
+}
+
+.install-banner__text {
+  flex: 1;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.install-banner__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.install-banner__button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #132331;
+  background: #84ddff;
+  cursor: pointer;
+}
+
+.install-banner__button--ghost {
+  color: #f6f7f9;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+@media (orientation: landscape) and (min-width: 1024px) {
+  .gate {
+    display: none;
+  }
+
+  .shell,
+  .install-banner {
+    display: flex;
+  }
+}
