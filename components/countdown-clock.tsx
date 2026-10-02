@@ -38,8 +38,13 @@ export function CountdownClock() {
 
     const intervalId = window.setInterval(() => {
       const result = reduceTick(stateRef.current);
+      const finished = stateRef.current.isRunning && !result.state.isRunning;
       stateRef.current = result.state;
       setState(result.state);
+
+      if (finished) {
+        setMenuOpen(true);
+      }
 
       if (result.beep === 'short') {
         playShortBeep();
