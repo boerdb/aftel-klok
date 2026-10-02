@@ -8,23 +8,9 @@ export function ServiceWorkerRegister() {
       return;
     }
 
-    let hadController = Boolean(navigator.serviceWorker.controller);
-
-    const onControllerChange = () => {
-      if (!hadController) {
-        hadController = true;
-        return;
-      }
-
-      window.location.reload();
-    };
-
-    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+    // A new version takes over fetches, but an open countdown keeps running.
+    // The next launch loads the update when the server is available.
     void navigator.serviceWorker.register('/sw.js');
-
-    return () => {
-      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
-    };
   }, []);
 
   return null;
