@@ -364,7 +364,7 @@ input {
 
 .big-time--with-minutes,
 .big-time--seconds-only {
-  font-size: clamp(9rem, 24vmin, 17rem);
+  font-size: clamp(12rem, 34vmin, 24rem);
 }
 
 .big-time--with-minutes {
@@ -398,7 +398,7 @@ input {
 
 .phase-label {
   position: absolute;
-  top: 30%;
+  top: calc(30% - 1lh);
   left: 0;
   right: 0;
   font-size: clamp(1.4rem, 3.2vmin, 2.6rem);

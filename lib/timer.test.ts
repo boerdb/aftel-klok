@@ -24,6 +24,14 @@ describe('timer', () => {
     expect(formatDuration(125)).toBe('2:05');
   });
 
+  it('caps a duration at 9:59', () => {
+    const next = updateDurationPart(initialState, 'work', 'minutes', 12);
+
+    expect(next.workMinutes).toBe(9);
+    expect(next.workSeconds).toBe(30);
+    expect(formatDuration(next.workMinutes * 60 + next.workSeconds)).toBe('9:30');
+  });
+
   it('formats the countdown as seconds only below one minute', () => {
     expect(formatDuration(59)).toBe('59');
   });

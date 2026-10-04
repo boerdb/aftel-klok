@@ -130,7 +130,11 @@ export function CountdownClock() {
     }
 
     const current = replaceOnNextDigit ? '' : String(fieldValue(state, activeField));
-    const next = `${current}${digit}`.replace(/^0+(?=\d)/, '').slice(0, 4);
+    const limit = activeField.kind === 'duration' && activeField.part === 'minutes' ? 1 : 4;
+    let next = `${current}${digit}`.replace(/^0+(?=\d)/, '');
+    if (next.length > limit) {
+      next = digit;
+    }
     setReplaceOnNextDigit(false);
     commitField(activeField, next);
   }
@@ -223,7 +227,17 @@ export function CountdownClock() {
 
         {state.isRunning ? (
           <div className="menu-actions">
-            <button type="button" className="round-button" onClick={() => apply(togglePause(state))}>
+            <button
+              type="button"
+              className="round-button"
+              onClick={() => {
+                const wasPaused = state.isPaused;
+                apply(togglePause(state));
+                if (wasPaused) {
+                  setMenuOpen(false);
+                }
+              }}
+            >
               {state.isPaused ? <PlayIcon /> : <PauseIcon />}
               <span>{state.isPaused ? 'Verder' : 'Pauze'}</span>
             </button>

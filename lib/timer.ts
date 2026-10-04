@@ -1,5 +1,6 @@
 export const RING_RADIUS = 46;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+export const MAX_DURATION_SECONDS = 9 * 60 + 59;
 
 export interface ClockState {
   workMinutes: number;
@@ -101,10 +102,9 @@ export function updateDurationPart(
   const parsedValue = parseWholeNumber(value);
   const currentMinutes = phase === 'work' ? state.workMinutes : state.pauseMinutes;
   const currentSeconds = phase === 'work' ? state.workSeconds : state.pauseSeconds;
-  const totalSeconds =
-    part === 'minutes'
-      ? toDurationInSeconds(parsedValue, currentSeconds)
-      : toDurationInSeconds(currentMinutes, parsedValue);
+  const minutes = Math.min(9, part === 'minutes' ? parsedValue : currentMinutes);
+  const seconds = part === 'seconds' ? parsedValue : currentSeconds;
+  const totalSeconds = Math.min(MAX_DURATION_SECONDS, toDurationInSeconds(minutes, seconds));
   const parts = splitDuration(totalSeconds);
 
   if (phase === 'work') {
