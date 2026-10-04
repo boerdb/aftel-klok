@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { playLongBeep, playShortBeep, unlockAudio } from '@/lib/audio';
+import { getBeepVolume, loadBeepVolume, playLongBeep, playShortBeep, setBeepVolume, unlockAudio } from '@/lib/audio';
 import {
   RING_CIRCUMFERENCE,
   RING_RADIUS,
@@ -24,12 +24,17 @@ export function CountdownClock() {
   const [activeField, setActiveField] = useState<SettingsField | null>(null);
   const [replaceOnNextDigit, setReplaceOnNextDigit] = useState(true);
   const [animateTimeModeSwitch, setAnimateTimeModeSwitch] = useState(false);
+  const [beepVolume, setBeepVolumeState] = useState(getBeepVolume);
   const stateRef = useRef(state);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const showedMinutesRef = useRef(showsMinutes(state.timeLeft));
   const menuRef = useRef<HTMLElement>(null);
 
   stateRef.current = state;
+
+  useEffect(() => {
+    setBeepVolumeState(loadBeepVolume());
+  }, []);
 
   useEffect(() => {
     if (!state.isRunning) {
@@ -274,6 +279,27 @@ export function CountdownClock() {
               active={activeField?.kind === 'rounds'}
               onActivate={() => activateField({ kind: 'rounds' })}
             />
+            <label className="volume-control">
+              <span>
+                Volume
+                <strong>{Math.round(beepVolume * 100)}%</strong>
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={Math.round(beepVolume * 100)}
+                aria-label="Volume van de piepjes"
+                onChange={(event) => {
+                  const next = Number(event.currentTarget.value) / 100;
+                  setBeepVolumeState(next);
+                  setBeepVolume(next);
+                }}
+                onPointerUp={() => playShortBeep()}
+                onKeyUp={() => playShortBeep()}
+              />
+            </label>
             {activeField && (
               <NumericKeypad
                 label={fieldLabel(activeField)}
