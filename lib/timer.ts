@@ -1,6 +1,7 @@
 export const RING_RADIUS = 46;
 export const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 export const MAX_DURATION_SECONDS = 9 * 60 + 59;
+export const OPENING_REST_SECONDS = 5;
 
 export interface ClockState {
   workMinutes: number;
@@ -71,8 +72,24 @@ export function formatDuration(totalSeconds: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
+function isOpeningRest(state: ClockState): boolean {
+  return state.isRunning && !state.isWorkPhase && state.remainingRounds === state.totalRounds;
+}
+
+function currentPhaseDuration(state: ClockState): number {
+  if (state.isWorkPhase) {
+    return workDuration(state);
+  }
+
+  if (isOpeningRest(state)) {
+    return OPENING_REST_SECONDS;
+  }
+
+  return pauseDuration(state);
+}
+
 export function ringOffset(state: ClockState): number {
-  const total = Math.max(1, state.isWorkPhase ? workDuration(state) : pauseDuration(state));
+  const total = Math.max(1, currentPhaseDuration(state));
   const elapsed = Math.min(total, Math.max(0, total - state.timeLeft));
   const elapsedRatio = elapsed / total;
   const progress = state.isWorkPhase ? elapsedRatio : 1 - elapsedRatio;
@@ -149,6 +166,7 @@ export function prepareTimer(state: ClockState): ClockState {
 export function startTimer(state: ClockState): ClockState {
   return {
     ...prepareTimer(state),
+    timeLeft: OPENING_REST_SECONDS,
     isRunning: true,
   };
 }

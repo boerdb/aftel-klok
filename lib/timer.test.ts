@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDuration,
   initialState,
+  OPENING_REST_SECONDS,
   prepareTimer,
   reduceTick,
+  ringOffset,
   showsMinutes,
   startTimer,
   stopTimer,
@@ -56,6 +58,35 @@ describe('timer', () => {
     expect(prepared.isWorkPhase).toBe(false);
     expect(prepared.timeLeft).toBe(12);
     expect(prepared.remainingRounds).toBe(3);
+  });
+
+  it('starts with 5 seconds of rest before the first training', () => {
+    const configured = updateDurationPart(initialState, 'pause', 'seconds', 40);
+    const started = startTimer(configured);
+
+    expect(started.isRunning).toBe(true);
+    expect(started.isWorkPhase).toBe(false);
+    expect(started.timeLeft).toBe(OPENING_REST_SECONDS);
+    expect(ringOffset(started)).toBeCloseTo(0);
+  });
+
+  it('uses the configured rest after the first training', () => {
+    const configured = updateDurationPart(
+      updateDurationPart(initialState, 'pause', 'seconds', 40),
+      'work',
+      'seconds',
+      20,
+    );
+    const started = startTimer(configured);
+    const work = reduceTick({ ...started, timeLeft: 0 }).state;
+    const rest = reduceTick({ ...work, timeLeft: 0 }).state;
+
+    expect(work.isWorkPhase).toBe(true);
+    expect(work.timeLeft).toBe(20);
+    expect(work.remainingRounds).toBe(5);
+    expect(rest.isWorkPhase).toBe(false);
+    expect(rest.timeLeft).toBe(40);
+    expect(rest.remainingRounds).toBe(4);
   });
 
   it('switches from rest to work without decreasing remaining rounds', () => {
