@@ -7,8 +7,8 @@ import {
   RING_RADIUS,
   type ClockState,
   formatDuration,
+  advanceTimer,
   initialState,
-  reduceTick,
   ringOffset,
   showsMinutes,
   startTimer,
@@ -37,12 +37,20 @@ export function CountdownClock() {
   }, []);
 
   useEffect(() => {
-    if (!state.isRunning) {
+    if (!state.isRunning || state.isPaused) {
       return;
     }
 
-    const intervalId = window.setInterval(() => {
-      const result = reduceTick(stateRef.current);
+    let lastTickAt = Date.now();
+
+    const catchUp = () => {
+      const elapsedSeconds = Math.floor((Date.now() - lastTickAt) / 1000);
+      if (elapsedSeconds <= 0) {
+        return;
+      }
+
+      lastTickAt += elapsedSeconds * 1000;
+      const result = advanceTimer(stateRef.current, elapsedSeconds);
       const finished = stateRef.current.isRunning && !result.state.isRunning;
       stateRef.current = result.state;
       setState(result.state);
@@ -56,10 +64,27 @@ export function CountdownClock() {
       } else if (result.beep === 'long') {
         playLongBeep();
       }
-    }, 1000);
+    };
 
-    return () => window.clearInterval(intervalId);
-  }, [state.isRunning]);
+    const onForeground = () => {
+      if (document.visibilityState === 'visible') {
+        catchUp();
+      }
+    };
+
+    // iPadOS freezes timers in the background. Wall-clock catch-up keeps the countdown correct.
+    const intervalId = window.setInterval(catchUp, 250);
+    document.addEventListener('visibilitychange', onForeground);
+    window.addEventListener('focus', onForeground);
+    window.addEventListener('pageshow', onForeground);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onForeground);
+      window.removeEventListener('focus', onForeground);
+      window.removeEventListener('pageshow', onForeground);
+    };
+  }, [state.isRunning, state.isPaused]);
 
   useEffect(() => {
     const nextShowsMinutes = showsMinutes(state.timeLeft);

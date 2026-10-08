@@ -32,7 +32,7 @@ input {
   gap: 12px;
   padding: 32px;
   text-align: center;
-  background: #0d124a;
+  background: #1a2778;
 }
 
 .gate h1 {
@@ -58,14 +58,14 @@ input {
 
 .shell--work {
   --ring-accent: #1fd2c7;
-  --ring-glow: rgba(31, 210, 199, 0.3);
-  background: #002b26;
+  --ring-glow: rgba(31, 210, 199, 0.45);
+  background: #0e5a50;
 }
 
 .shell--rest {
   --ring-accent: #45b8ff;
-  --ring-glow: rgba(69, 184, 255, 0.32);
-  background: #0d124a;
+  --ring-glow: rgba(69, 184, 255, 0.48);
+  background: #1a2778;
 }
 
 .stage {

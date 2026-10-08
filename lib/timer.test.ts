@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  advanceTimer,
   formatDuration,
   initialState,
   OPENING_REST_SECONDS,
@@ -147,5 +148,45 @@ describe('timer', () => {
 
     expect(ticked.state.timeLeft).toBe(0);
     expect(ticked.beep).toBe('long');
+  });
+
+  it('keeps a single elapsed second identical to one tick', () => {
+    const running = { ...startTimer(initialState), timeLeft: 4 };
+    const advanced = advanceTimer(running, 1);
+    const ticked = reduceTick(running);
+
+    expect(advanced).toEqual(ticked);
+  });
+
+  it('catches up elapsed time after the app was in the background', () => {
+    const configured = updateDurationPart(
+      updateDurationPart(updateRounds(initialState, 2), 'work', 'seconds', 20),
+      'pause',
+      'seconds',
+      40,
+    );
+    const started = startTimer(configured);
+
+    const intoWork = advanceTimer(started, OPENING_REST_SECONDS + 1);
+    expect(intoWork.state.isWorkPhase).toBe(true);
+    expect(intoWork.state.timeLeft).toBe(20);
+    expect(intoWork.state.remainingRounds).toBe(2);
+    expect(intoWork.beep).toBeNull();
+
+    const intoRest = advanceTimer(intoWork.state, 21);
+    expect(intoRest.state.isWorkPhase).toBe(false);
+    expect(intoRest.state.timeLeft).toBe(40);
+    expect(intoRest.state.remainingRounds).toBe(1);
+
+    const finished = advanceTimer(started, 10_000);
+    expect(finished.state.isRunning).toBe(false);
+    expect(finished.state.isWorkPhase).toBe(false);
+    expect(finished.beep).toBeNull();
+  });
+
+  it('does not advance a paused timer', () => {
+    const paused = { ...startTimer(initialState), isPaused: true, timeLeft: 4 };
+
+    expect(advanceTimer(paused, 30).state).toEqual(paused);
   });
 });

@@ -222,3 +222,31 @@ export function reduceTick(state: ClockState): { state: ClockState; beep: Beep }
     beep: null,
   };
 }
+
+export function advanceTimer(state: ClockState, elapsedSeconds: number): { state: ClockState; beep: Beep } {
+  const steps = Math.floor(elapsedSeconds);
+  if (steps <= 0 || !state.isRunning || state.isPaused) {
+    return { state, beep: null };
+  }
+
+  if (steps === 1) {
+    return reduceTick(state);
+  }
+
+  let next = state;
+  let remaining = steps;
+
+  while (remaining > 0 && next.isRunning) {
+    if (next.timeLeft > 0) {
+      const consume = Math.min(remaining, next.timeLeft);
+      next = { ...next, timeLeft: next.timeLeft - consume };
+      remaining -= consume;
+      continue;
+    }
+
+    next = reduceTick(next).state;
+    remaining -= 1;
+  }
+
+  return { state: next, beep: null };
+}
