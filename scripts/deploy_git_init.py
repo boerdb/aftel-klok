@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Eerste keer: git clone op NEXT-server, build, PM2 (poort 3020)."""
+"""Eerste keer: git clone op NEXT-server, build, PM2 (poort 3020).
+
+Publiek: https://timer.clvs.nl
+"""
 from __future__ import annotations
 
 import os
@@ -17,6 +20,7 @@ REPO = os.environ.get(
 )
 PORT = int(os.environ.get("DEPLOY_PORT", "3020"))
 APP_NAME = os.environ.get("DEPLOY_APP", "aftelklok")
+PUBLIC_URL = os.environ.get("DEPLOY_PUBLIC_URL", "https://timer.clvs.nl")
 
 
 def run(
@@ -76,7 +80,7 @@ def main() -> None:
     )
 
     print("\n=== Git deploy done ===")
-    print(f"http://{HOST}:{PORT}  ({REMOTE_DIR})")
+    print(f"{PUBLIC_URL}  (lokaal: http://{HOST}:{PORT}, {REMOTE_DIR})")
     ssh.close()
 
 

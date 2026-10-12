@@ -1,5 +1,13 @@
 import type { Metadata, Viewport } from 'next';
+import { Barlow_Condensed } from 'next/font/google';
 import './globals.css';
+
+const bigTimeFont = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['800'],
+  variable: '--font-big-time',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Aftelklok',
@@ -37,7 +45,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="nl">
+    <html lang="nl" className={bigTimeFont.variable}>
       <body>{children}</body>
     </html>
   );

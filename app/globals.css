@@ -380,6 +380,7 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-big-time), system-ui, sans-serif;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -411,25 +412,26 @@ input {
 }
 
 .big-time--with-minutes .digit-roll + .digit-roll {
-  margin-left: 0.01em;
+  margin-left: 0.04em;
 }
 
 .digit-roll {
   display: block;
-  flex: 0 0 0.66em;
-  width: 0.66em;
+  flex: 0 0 0.58em;
+  width: 0.58em;
   height: var(--roll-slot);
   overflow: hidden;
   line-height: 1;
 }
 
 /* Minutes only change once a minute, so that cell may follow the glyph width
-   (a narrow "1" frees room); seconds keep a fixed width so they never jitter. */
+   (a narrow "1" frees room); seconds keep a fixed width so they never jitter.
+   Width must fit a stroked "4"/"8" in Barlow Condensed — too tight and 4:44 overlaps. */
 .big-time--with-minutes .digit-roll {
-  flex-basis: 0.6em;
-  width: 0.6em;
+  flex-basis: 0.55em;
+  width: 0.55em;
   overflow: visible;
-  clip-path: inset(0 -0.2em);
+  clip-path: inset(0 -0.12em);
 }
 
 .big-time--with-minutes .digit-roll:first-child {
@@ -469,16 +471,16 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 0.28em;
-  width: 0.28em;
+  flex: 0 0 0.22em;
+  width: 0.22em;
   height: var(--roll-slot);
-  transform: translateY(-0.12em);
+  transform: translateY(-0.08em);
   line-height: 1;
 }
 
 .big-time--with-minutes .big-time__mark {
-  flex-basis: 0.24em;
-  width: 0.24em;
+  flex-basis: 0.2em;
+  width: 0.2em;
 }
 
 .sr-only {

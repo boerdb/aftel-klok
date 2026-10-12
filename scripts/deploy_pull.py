@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Update op server via git pull + build + PM2 restart."""
+"""Update op server via git pull + build + PM2 restart.
+
+Publiek: https://timer.clvs.nl  (PM2 op poort 3020, zie deploy/nginx-aftelklok.conf)
+"""
 from __future__ import annotations
 
 import os
@@ -13,6 +16,7 @@ PASSWORD = os.environ.get("DEPLOY_PASSWORD", "")
 REMOTE_DIR = os.environ.get("DEPLOY_DIR", "/var/www/aftelklok")
 PORT = int(os.environ.get("DEPLOY_PORT", "3020"))
 APP_NAME = os.environ.get("DEPLOY_APP", "aftelklok")
+PUBLIC_URL = os.environ.get("DEPLOY_PUBLIC_URL", "https://timer.clvs.nl")
 
 
 def run(ssh: paramiko.SSHClient, cmd: str, timeout: int = 600) -> None:
@@ -46,7 +50,7 @@ def main() -> None:
         f"sleep 2 && curl -s -o /dev/null -w '%{{http_code}}\\n' http://127.0.0.1:{PORT}/",
     )
     ssh.close()
-    print("Pull deploy OK")
+    print(f"Pull deploy OK — {PUBLIC_URL}")
 
 
 if __name__ == "__main__":

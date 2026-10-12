@@ -1,4 +1,4 @@
-/** PM2 — Aftelklok (poort 3020). */
+/** PM2 — Aftelklok (poort 3020). Publiek: https://timer.clvs.nl */
 module.exports = {
   apps: [
     {
