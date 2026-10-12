@@ -28,6 +28,7 @@ export function CountdownClock() {
   const stateRef = useRef(state);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const showedMinutesRef = useRef(showsMinutes(state.timeLeft));
+  const previousTimeRef = useRef(state.timeLeft);
   const menuRef = useRef<HTMLElement>(null);
 
   stateRef.current = state;
@@ -85,6 +86,10 @@ export function CountdownClock() {
       window.removeEventListener('pageshow', onForeground);
     };
   }, [state.isRunning, state.isPaused]);
+
+  useEffect(() => {
+    previousTimeRef.current = state.timeLeft;
+  }, [state.timeLeft]);
 
   useEffect(() => {
     const nextShowsMinutes = showsMinutes(state.timeLeft);
@@ -179,6 +184,11 @@ export function CountdownClock() {
   }
 
   const minutesVisible = showsMinutes(state.timeLeft);
+  const rollDigits =
+    state.isRunning &&
+    !state.isPaused &&
+    previousTimeRef.current - state.timeLeft === 1 &&
+    showsMinutes(previousTimeRef.current) === minutesVisible;
   const phaseClass = state.isWorkPhase ? 'shell--work' : 'shell--rest';
 
   return (
@@ -195,6 +205,14 @@ export function CountdownClock() {
           }
         }}
       >
+        <div className="rounds-badge">
+          <span className="rounds-badge__label">Nog</span>
+          <span className="rounds-badge__count">{state.remainingRounds}</span>
+          <span className="rounds-badge__label">
+            {state.remainingRounds === 1 ? 'ronde' : 'rondes'}
+          </span>
+        </div>
+
         <div className="countdown-ring">
           <svg className="countdown-ring__svg" viewBox="0 0 100 100" aria-hidden="true">
             <circle className="countdown-ring__track" cx="50" cy="50" r={RING_RADIUS} />
@@ -208,13 +226,11 @@ export function CountdownClock() {
             />
           </svg>
 
-          <div className="info-top">
-            NOG {state.remainingRounds} RONDE{state.remainingRounds === 1 ? '' : 'S'}
-          </div>
-
           <div className="countdown-ring__inner">
             <div className="phase-label">{state.isWorkPhase ? 'TRAINING' : 'RUST'}</div>
-            <div
+            <RollingTime
+              seconds={state.timeLeft}
+              motion={rollDigits}
               className={[
                 'big-time',
                 minutesVisible ? 'big-time--with-minutes' : 'big-time--seconds-only',
@@ -222,9 +238,7 @@ export function CountdownClock() {
               ]
                 .filter(Boolean)
                 .join(' ')}
-            >
-              {formatDuration(state.timeLeft)}
-            </div>
+            />
           </div>
         </div>
 
@@ -235,7 +249,7 @@ export function CountdownClock() {
 
       <div className="brand-credit">
         <img src="/logo-fysioharlingen.png?v=2" alt="Fysiotherapie en Training" width={92} height={36} />
-        <span>© 2026 V 0.1.1</span>
+        <span>© 2026 V 0.2.0</span>
       </div>
 
       <button
@@ -349,6 +363,82 @@ export function CountdownClock() {
         )}
       </aside>
     </div>
+  );
+}
+
+const DIGIT_ROLL_MS = 450;
+
+function timeParts(totalSeconds: number): { key: string; value: string; kind: 'digit' | 'mark' }[] {
+  const characters = [...formatDuration(totalSeconds)];
+
+  return characters.map((character, index) => {
+    const placeFromEnd = characters.length - 1 - index;
+    if (character === ':') {
+      return { key: 'colon', value: character, kind: 'mark' };
+    }
+
+    return { key: `place-${placeFromEnd}`, value: character, kind: 'digit' };
+  });
+}
+
+function RollingTime({
+  seconds,
+  motion,
+  className,
+}: {
+  seconds: number;
+  motion: boolean;
+  className: string;
+}) {
+  return (
+    <>
+      <span className="sr-only">{formatDuration(seconds)}</span>
+      <div className={className} aria-hidden="true">
+        {timeParts(seconds).map((part) =>
+          part.kind === 'mark' ? (
+            <span key={part.key} className="big-time__mark">
+              <span className="digit-roll__glyph">{part.value}</span>
+            </span>
+          ) : (
+            <RollingDigit key={part.key} value={part.value} motion={motion} />
+          ),
+        )}
+      </div>
+    </>
+  );
+}
+
+function RollingDigit({ value, motion }: { value: string; motion: boolean }) {
+  const [shown, setShown] = useState(value);
+  const [outgoing, setOutgoing] = useState<string | null>(null);
+
+  if (value !== shown) {
+    setShown(value);
+    setOutgoing(motion ? shown : null);
+  }
+
+  useEffect(() => {
+    if (outgoing === null) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setOutgoing(null), DIGIT_ROLL_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [outgoing, shown]);
+
+  return (
+    <span className="digit-roll">
+      <span key={shown} className={outgoing === null ? 'digit-roll__strip' : 'digit-roll__strip is-rolling'}>
+        <span className="digit-roll__cell">
+          <span className="digit-roll__glyph">{shown}</span>
+        </span>
+        {outgoing !== null && (
+          <span className="digit-roll__cell" aria-hidden="true">
+            <span className="digit-roll__glyph">{outgoing}</span>
+          </span>
+        )}
+      </span>
+    </span>
   );
 }
 

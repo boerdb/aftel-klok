@@ -376,6 +376,10 @@ input {
 }
 
 .big-time {
+  --roll-slot: 1.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -394,12 +398,115 @@ input {
   font-size: clamp(12rem, 34vmin, 24rem);
 }
 
-.big-time--with-minutes {
-  letter-spacing: -0.06em;
+.big-time--seconds-only {
+  gap: 0.02em;
 }
 
-.big-time--seconds-only {
-  letter-spacing: -0.03em;
+.big-time--with-minutes {
+  gap: 0;
+}
+
+.big-time--with-minutes .big-time__mark {
+  margin: 0 0.03em;
+}
+
+.big-time--with-minutes .digit-roll + .digit-roll {
+  margin-left: 0.01em;
+}
+
+.digit-roll {
+  display: block;
+  flex: 0 0 0.66em;
+  width: 0.66em;
+  height: var(--roll-slot);
+  overflow: hidden;
+  line-height: 1;
+}
+
+/* Minutes only change once a minute, so that cell may follow the glyph width
+   (a narrow "1" frees room); seconds keep a fixed width so they never jitter. */
+.big-time--with-minutes .digit-roll {
+  flex-basis: 0.6em;
+  width: 0.6em;
+  overflow: visible;
+  clip-path: inset(0 -0.2em);
+}
+
+.big-time--with-minutes .digit-roll:first-child {
+  flex: 0 0 auto;
+  width: auto;
+  font-variant-numeric: proportional-nums;
+}
+
+.digit-roll__strip {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.digit-roll__strip.is-rolling {
+  animation: digit-roll-down 0.45s ease-in-out;
+}
+
+.digit-roll__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--roll-slot);
+  line-height: 1;
+}
+
+.digit-roll__glyph {
+  display: block;
+  line-height: 1;
+  /* Centers the digits' cap height in the ring instead of the font's line box,
+     which sits the ink low and makes the bottom corners hit the ring first. */
+  text-box: trim-both cap alphabetic;
+}
+
+.big-time__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 0.28em;
+  width: 0.28em;
+  height: var(--roll-slot);
+  transform: translateY(-0.12em);
+  line-height: 1;
+}
+
+.big-time--with-minutes .big-time__mark {
+  flex-basis: 0.24em;
+  width: 0.24em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes digit-roll-down {
+  from {
+    transform: translateY(calc(var(--roll-slot) * -1));
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .digit-roll__strip.is-rolling {
+    animation: none;
+  }
 }
 
 .big-time--mode-switch {
@@ -434,15 +541,42 @@ input {
   text-align: center;
 }
 
-.info-top {
+.rounds-badge {
+  --rounds-label-size: clamp(1rem, 2.4vmin, 1.75rem);
   position: absolute;
-  top: 16%;
-  left: 0;
-  right: 0;
+  left: max(18px, env(safe-area-inset-left, 0px));
+  bottom: calc(3 * var(--rounds-label-size) + env(safe-area-inset-bottom, 0px));
   z-index: 2;
-  font-size: clamp(1.2rem, 2.5vmin, 2rem);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+.rounds-badge__label {
+  padding-left: 0.22em;
+  font-size: var(--rounds-label-size);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+}
+
+.rounds-badge__count {
+  margin-bottom: 0.2em;
+  font-size: clamp(4.5rem, 11vmin, 8rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.85;
+  color: #ffe14a;
+  -webkit-text-stroke: 3px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 3px 0 #000,
+    0 8px 16px rgba(0, 0, 0, 0.9);
 }
 
 .phone-gate {
