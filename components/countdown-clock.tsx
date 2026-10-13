@@ -249,7 +249,7 @@ export function CountdownClock() {
 
       <div className="brand-credit">
         <img src="/logo-fysioharlingen.png?v=2" alt="Fysiotherapie en Training" width={92} height={36} />
-        <span>© 2026 V 0.2.0</span>
+        <span>© 2026 V 0.2.1</span>
       </div>
 
       <button

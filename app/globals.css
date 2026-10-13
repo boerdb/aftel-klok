@@ -532,22 +532,28 @@ input {
   }
 }
 
+.phase-label,
+.rounds-badge__label {
+  font-weight: 400;
+  letter-spacing: 0.45rem;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.8;
+}
+
 .phase-label {
   position: absolute;
-  top: calc(30% - 1lh);
+  top: calc(24% - 1lh);
   left: 0;
   right: 0;
   font-size: clamp(1.4rem, 3.2vmin, 2.6rem);
-  letter-spacing: 0.45rem;
-  opacity: 0.8;
   text-align: center;
 }
 
 .rounds-badge {
-  --rounds-label-size: clamp(1rem, 2.4vmin, 1.75rem);
   position: absolute;
-  left: max(18px, env(safe-area-inset-left, 0px));
-  bottom: calc(3 * var(--rounds-label-size) + env(safe-area-inset-bottom, 0px));
+  left: max(52px, calc(34px + env(safe-area-inset-left, 0px)));
+  bottom: calc(4.2 * 1.15rem + env(safe-area-inset-bottom, 0px));
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -558,13 +564,8 @@ input {
 }
 
 .rounds-badge__label {
-  padding-left: 0.22em;
-  font-size: var(--rounds-label-size);
-  font-weight: 800;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  padding-left: 0.45rem;
+  font-size: clamp(1.15rem, 2.7vmin, 2.1rem);
 }
 
 .rounds-badge__count {
