@@ -1,7 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { getBeepVolume, loadBeepVolume, playLongBeep, playShortBeep, setBeepVolume, unlockAudio } from '@/lib/audio';
+import {
+  getBeepVolume,
+  loadBeepVolume,
+  pauseSessionTrack,
+  playLongBeep,
+  playShortBeep,
+  resumeSessionTrack,
+  sessionTrackCovers,
+  setBeepVolume,
+  startSessionTrack,
+  stopSessionTrack,
+  syncSessionTrack,
+  unlockAudio,
+} from '@/lib/audio';
 import {
   RING_CIRCUMFERENCE,
   RING_RADIUS,
@@ -10,6 +23,9 @@ import {
   advanceTimer,
   initialState,
   ringOffset,
+  sessionBeeps,
+  sessionElapsed,
+  sessionLength,
   showsMinutes,
   startTimer,
   stopTimer,
@@ -35,6 +51,7 @@ export function CountdownClock() {
 
   useEffect(() => {
     setBeepVolumeState(loadBeepVolume());
+    return () => stopSessionTrack();
   }, []);
 
   useEffect(() => {
@@ -57,7 +74,15 @@ export function CountdownClock() {
       setState(result.state);
 
       if (finished) {
+        stopSessionTrack();
         setMenuOpen(true);
+        return;
+      }
+
+      const elapsed = sessionElapsed(result.state);
+      syncSessionTrack(elapsed + (Date.now() - lastTickAt) / 1000);
+      if (sessionTrackCovers(elapsed)) {
+        return;
       }
 
       if (result.beep === 'short') {
@@ -70,6 +95,10 @@ export function CountdownClock() {
     const onForeground = () => {
       if (document.visibilityState === 'visible') {
         catchUp();
+        if (stateRef.current.isRunning) {
+          // The track may have been paused from the lock screen or by a phone call.
+          resumeSessionTrack(sessionElapsed(stateRef.current) + (Date.now() - lastTickAt) / 1000);
+        }
       }
     };
 
@@ -249,7 +278,7 @@ export function CountdownClock() {
 
       <div className="brand-credit">
         <img src="/logo-fysioharlingen.png?v=2" alt="Fysiotherapie en Training" width={92} height={36} />
-        <span>© 2026 V 0.2.1</span>
+        <span>© 2026 V 0.2.2</span>
       </div>
 
       <button
@@ -276,6 +305,11 @@ export function CountdownClock() {
               className="round-button"
               onClick={() => {
                 const wasPaused = state.isPaused;
+                if (wasPaused) {
+                  resumeSessionTrack(sessionElapsed(state));
+                } else {
+                  pauseSessionTrack();
+                }
                 apply(togglePause(state));
                 if (wasPaused) {
                   setMenuOpen(false);
@@ -288,7 +322,10 @@ export function CountdownClock() {
             <button
               type="button"
               className="round-button"
-              onClick={() => apply(stopTimer(state))}
+              onClick={() => {
+                stopSessionTrack();
+                apply(stopTimer(state));
+              }}
             >
               <StopIcon />
               <span>Stop</span>
@@ -352,7 +389,9 @@ export function CountdownClock() {
               className="start-button"
               onClick={() => {
                 unlockAudio();
-                apply(startTimer(state));
+                const started = startTimer(state);
+                startSessionTrack(sessionBeeps(started), sessionLength(started));
+                apply(started);
                 setMenuOpen(false);
               }}
             >

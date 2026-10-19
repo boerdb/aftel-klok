@@ -7,6 +7,9 @@ import {
   prepareTimer,
   reduceTick,
   ringOffset,
+  sessionBeeps,
+  sessionElapsed,
+  sessionLength,
   showsMinutes,
   startTimer,
   stopTimer,
@@ -188,5 +191,28 @@ describe('timer', () => {
     const paused = { ...startTimer(initialState), isPaused: true, timeLeft: 4 };
 
     expect(advanceTimer(paused, 30).state).toEqual(paused);
+  });
+
+  it('describes the beeps and position of a whole session like the ticking clock does', () => {
+    const configured = updateRounds(
+      updateDurationPart(updateDurationPart(initialState, 'work', 'seconds', 7), 'pause', 'seconds', 2),
+      3,
+    );
+    let state = startTimer(configured);
+    const heard: { at: number; beep: string }[] = [];
+
+    for (let second = 1; state.isRunning; second += 1) {
+      expect(sessionElapsed(state)).toBe(second - 1);
+      const result = reduceTick(state);
+      if (result.beep) {
+        heard.push({ at: second, beep: result.beep });
+      }
+      state = result.state;
+      if (!state.isRunning) {
+        expect(second).toBe(sessionLength(configured));
+      }
+    }
+
+    expect(sessionBeeps(configured)).toEqual(heard);
   });
 });
