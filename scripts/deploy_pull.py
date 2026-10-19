@@ -13,6 +13,7 @@ import paramiko
 HOST = os.environ.get("DEPLOY_HOST", "192.168.1.32")
 USER = os.environ.get("DEPLOY_USER", "root")
 PASSWORD = os.environ.get("DEPLOY_PASSWORD", "")
+SSH_KEY_PATH = os.path.expanduser(os.environ.get("SSH_KEY_PATH", "~/.ssh/id_ed25519_homelab"))
 REMOTE_DIR = os.environ.get("DEPLOY_DIR", "/var/www/aftelklok")
 PORT = int(os.environ.get("DEPLOY_PORT", "3020"))
 APP_NAME = os.environ.get("DEPLOY_APP", "aftelklok")
@@ -35,12 +36,14 @@ def run(ssh: paramiko.SSHClient, cmd: str, timeout: int = 600) -> None:
 
 
 def main() -> None:
-    if not PASSWORD:
-        raise SystemExit("Zet DEPLOY_PASSWORD voordat je dit script draait.")
-
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(HOST, username=USER, password=PASSWORD, timeout=30)
+    if os.path.exists(SSH_KEY_PATH):
+        ssh.connect(HOST, username=USER, key_filename=SSH_KEY_PATH, allow_agent=False, look_for_keys=False, timeout=30)
+    elif PASSWORD:
+        ssh.connect(HOST, username=USER, password=PASSWORD, timeout=30)
+    else:
+        raise SystemExit(f"Geen SSH-sleutel op {SSH_KEY_PATH}; zet SSH_KEY_PATH of DEPLOY_PASSWORD.")
     run(ssh, f"cd {REMOTE_DIR} && git pull")
     run(ssh, f"cd {REMOTE_DIR} && npm ci")
     run(ssh, f"cd {REMOTE_DIR} && npm run build")
