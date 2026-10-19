@@ -223,51 +223,6 @@ export function reduceTick(state: ClockState): { state: ClockState; beep: Beep }
   };
 }
 
-// Durations of the phases of a session in order: opening rest, then work and pause alternating.
-// A phase lasts one second longer than its duration, because the clock shows 0 before moving on.
-function sessionPhases(state: ClockState): number[] {
-  const phases = [OPENING_REST_SECONDS];
-  for (let round = 0; round < Math.max(1, state.totalRounds); round += 1) {
-    if (round > 0) {
-      phases.push(pauseDuration(state));
-    }
-    phases.push(workDuration(state));
-  }
-  return phases;
-}
-
-export function sessionLength(state: ClockState): number {
-  return sessionPhases(state).reduce((total, duration) => total + duration + 1, 0);
-}
-
-// Seconds since the start of the session, matching how reduceTick walks through the phases.
-export function sessionElapsed(state: ClockState): number {
-  if (!state.isRunning) {
-    return 0;
-  }
-
-  const completedRounds = state.totalRounds - state.remainingRounds;
-  const phaseIndex = state.isWorkPhase ? 2 * completedRounds + 1 : 2 * completedRounds;
-  const phases = sessionPhases(state);
-  const before = phases.slice(0, phaseIndex).reduce((total, duration) => total + duration + 1, 0);
-  return before + Math.max(0, phases[phaseIndex] - state.timeLeft);
-}
-
-export function sessionBeeps(state: ClockState): { at: number; beep: Exclude<Beep, null> }[] {
-  const beeps: { at: number; beep: Exclude<Beep, null> }[] = [];
-  let start = 0;
-
-  for (const duration of sessionPhases(state)) {
-    for (let left = Math.min(3, duration - 1); left >= 1; left -= 1) {
-      beeps.push({ at: start + duration - left, beep: 'short' });
-    }
-    beeps.push({ at: start + duration, beep: 'long' });
-    start += duration + 1;
-  }
-
-  return beeps;
-}
-
 export function advanceTimer(state: ClockState, elapsedSeconds: number): { state: ClockState; beep: Beep } {
   const steps = Math.floor(elapsedSeconds);
   if (steps <= 0 || !state.isRunning || state.isPaused) {
