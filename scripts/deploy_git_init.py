@@ -10,7 +10,7 @@ import sys
 
 import paramiko
 
-HOST = os.environ.get("DEPLOY_HOST", "192.168.1.32")
+HOST = os.environ.get("DEPLOY_HOST", "85.10.144.42")
 USER = os.environ.get("DEPLOY_USER", "root")
 PASSWORD = os.environ.get("DEPLOY_PASSWORD", "")
 REMOTE_DIR = os.environ.get("DEPLOY_DIR", "/var/www/aftelklok")
